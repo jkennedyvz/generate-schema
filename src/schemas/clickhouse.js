@@ -15,22 +15,26 @@ var types = {
   'null': 'String'
 }
 
+function quoteIdentifier (name) {
+  return '`' + String(name).replace(/`/g, '``') + '`'
+}
+
 var lang = {
   create: function (name) {
-    return ['CREATE TABLE ', name, ' ('].join('')
+    return ['CREATE TABLE ', quoteIdentifier(name), ' ('].join('')
   },
 
   close: function (id, dateField) {
     if (!dateField) return [') ENGINE = Memory;'].join('')
-    else return [') ENGINE = MergeTree(', dateField, ', (', id, ', ', dateField, '), 8192);'].join('')
+    else return [') ENGINE = MergeTree(', quoteIdentifier(dateField), ', (', quoteIdentifier(id), ', ', quoteIdentifier(dateField), '), 8192);'].join('')
   },
 
   id: function (name, value) {
-    return ['  ', name, '_id ', value, ','].join('')
+    return ['  ', quoteIdentifier(name + '_id'), ' ', value, ','].join('')
   },
 
   property: function (name, value) {
-    return ['  ', name, ' ', value, ','].join('')
+    return ['  ', quoteIdentifier(name), ' ', value, ','].join('')
   },
 
 }

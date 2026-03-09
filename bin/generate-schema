@@ -5,6 +5,7 @@ var GenerateSchema = require('../src/index')
 var cli = require('commander')
 var pkg = require('../package.json')
 var fs = require('fs')
+var path = require('path')
 
 // Outputs
 var content = ''
@@ -58,11 +59,7 @@ function evaluate (data) {
   try {
     obj = JSON.parse(data)
   } catch (e) {
-    try {
-      obj = eval('(' + data + ')')
-    } catch (e) {
-      console.log('Invalid Object or JSON')
-    }
+    console.log('Invalid JSON: ' + e.message)
   }
 
   return obj
@@ -72,7 +69,7 @@ function prompt (motd) {
   if (motd && !quiet) {
     console.log('generate-schema', 'v' + pkg.version, '(' + mode + ')')
     console.log('Type', '"exit"', 'to quit.')
-    console.log('Type', '{a:"b"}', 'to see an example.')
+    console.log('Type', '{"a":"b"}', 'to see an example.')
   }
 
   if (process.stdin.isTTY) {
@@ -103,7 +100,18 @@ function callback (data) {
 var stream = process.stdin
 
 if (file) {
-  stream = fs.createReadStream(file)
+  var resolvedFile = path.resolve(file)
+  try {
+    var stat = fs.lstatSync(resolvedFile)
+    if (!stat.isFile()) {
+      console.error('Error: not a regular file: ' + file)
+      process.exit(1)
+    }
+  } catch (e) {
+    console.error('Error: cannot access file: ' + file)
+    process.exit(1)
+  }
+  stream = fs.createReadStream(resolvedFile)
   stream.on('close', function () {
     process.exit(1)
   })

@@ -14,9 +14,13 @@ var types = {
   'null': 'TEXT'
 }
 
+function quoteIdentifier (name) {
+  return '`' + String(name).replace(/`/g, '``') + '`'
+}
+
 var lang = {
   create: function (name) {
-    return ['CREATE TABLE ', name, ' ('].join('')
+    return ['CREATE TABLE ', quoteIdentifier(name), ' ('].join('')
   },
 
   close: function () {
@@ -24,19 +28,19 @@ var lang = {
   },
 
   id: function (name, value) {
-    return ['  ', name, '_id ', value, ','].join('')
+    return ['  ', quoteIdentifier(name + '_id'), ' ', value, ','].join('')
   },
 
   property: function (name, value) {
-    return ['  ', name, ' ', value, ','].join('')
+    return ['  ', quoteIdentifier(name), ' ', value, ','].join('')
   },
 
   primary: function (id) {
-    return ['  PRIMARY KEY (', id, '),'].join('')
+    return ['  PRIMARY KEY (', quoteIdentifier(id), '),'].join('')
   },
 
   foreign: function (key1, table, key2) {
-    return ['  FOREIGN KEY (', key1, ') REFERENCES ', table, '(', key2, '),'].join('')
+    return ['  FOREIGN KEY (', quoteIdentifier(key1), ') REFERENCES ', quoteIdentifier(table), '(', quoteIdentifier(key2), '),'].join('')
   },
 }
 
